@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>RareExplorer – Bookings</title>
+  <style>
+    :root{ --bg:#071028; --muted:#94a3b8; --accent:#06b6d4; }
+    body{ margin:0; font-family:Arial, sans-serif; background:var(--bg); color:#e6eef8; }
+    header{ display:flex; align-items:center; justify-content:space-between; padding:12px 18px; background:#0f172a; border-bottom:1px solid rgba(255,255,255,0.03) }
+    .brand{ display:flex; gap:12px; align-items:center }
+    .brand img{height:42px;border-radius:8px}
+    nav a{ color:#cfe8ff; text-decoration:none; font-weight:700; padding:8px 10px; border-radius:8px }
+    .container{ max-width:1200px; margin:18px auto; padding:0 18px; }
+    .controls{ display:flex; gap:8px; align-items:center; margin-bottom:12px; flex-wrap:wrap }
+    .search{ padding:8px 12px; border-radius:8px; border:0; background:#061122; color:#e6eef8; min-width:220px }
+    .btn{ padding:8px 12px; border-radius:8px; font-weight:700; cursor:pointer; border:0 }
+    .btn-primary{ background:linear-gradient(90deg,#4f46e5,#06b6d4); color:#042027 }
+    .table-wrap{ background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent); border:1px solid rgba(255,255,255,0.03); border-radius:10px; padding:12px; box-shadow:0 8px 30px rgba(0,0,0,0.5); overflow:auto }
+    table{ width:100%; border-collapse:collapse; min-width:900px }
+    th,td{ text-align:left; padding:10px 12px; color:#dbeeff; font-size:14px }
+    thead th{ position:sticky; top:0; background:rgba(255,255,255,0.02); font-weight:800; color:#cfe8ff; border-bottom:1px solid rgba(255,255,255,0.04) }
+    tr:hover td{ background:rgba(255,255,255,0.01) }
+    .pkg-cell{ display:flex; gap:10px; align-items:center }
+    .pkg-thumb{ width:64px; height:48px; object-fit:cover; border-radius:6px; border:1px solid rgba(255,255,255,0.04) }
+    .status-select{ padding:6px 8px; border-radius:8px; background:#02111b; color:#e6eef8; border:1px solid rgba(255,255,255,0.04) }
+    .small-muted{ color:var(--muted); font-size:13px }
+    .modal{ display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:1200; padding:20px; box-sizing:border-box; overflow:auto }
+    .modal.show{ display:flex; align-items:center; justify-content:center }
+    .modal-card{ width:900px; max-width:96%; background:linear-gradient(180deg,#0f172a,#071023); border-radius:12px; padding:18px; color:#e6eef8; border:1px solid rgba(255,255,255,0.03) }
+    .close-x{ position:absolute; top:12px; right:14px; background:transparent; border:none; color:#cfe8ff; font-size:20px; cursor:pointer }
+    @media(max-width:920px){ .modal-card{ width:92% } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <img src="Images/logo.jpg" alt="logo">
+      <div><div style="font-weight:800">RareExplorer</div><div class="small-muted">Bookings</div></div>
+    </div>
+    <nav>
+      <a href="Packages.html">← Back to Packages</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <div class="controls">
+      <input id="searchInput" class="search" placeholder="Search package / city / payer" oninput="filterBookings()">
+      <button class="btn btn-primary" onclick="loadBookings()">Refresh</button>
+      <div id="count" style="margin-left:auto" class="small-muted"></div>
+    </div>
+
+    <div class="table-wrap" role="region" aria-label="Bookings">
+      <table id="bookingsTable" aria-live="polite">
+        <thead>
+          <tr>
+            <th style="min-width:260px">Package</th>
+            <th>City</th>
+            <th>Travel Date</th>
+            <th>Price</th>
+            <th>Booker</th>
+            <th>Status</th>
+            <th style="text-align:right; width:140px">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="tbody">
+          <tr><td colspan="7" style="text-align:center; padding:24px; color:var(--muted)">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- Receipt modal (same UI as Packages) -->
+  <div id="viewModal" class="modal" onclick="if(event.target.id==='viewModal') closeViewModal()">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="viewPackageName">
+      <button class="close-x" title="Close" onclick="closeViewModal()">✕</button>
+      <div class="receipt">
+        <div class="title" style="text-align:center; font-size:20px; color:#a78bfa; font-weight:800">RareExplorer</div>
+        <div style="display:flex; gap:12px; flex-wrap:wrap">
+          <div style="flex:1; min-width:280px">
+            <div class="small-muted">Package</div>
+            <div id="viewPackageName" style="font-weight:800; margin-bottom:6px">-</div>
+            <div class="small-muted">Destination</div>
+            <div id="viewCity" style="font-weight:700; margin-bottom:6px">-</div>
+            <div class="small-muted">Duration</div>
+            <div id="viewDuration" style="font-weight:700; margin-bottom:6px">-</div>
+
+            <div style="margin-top:8px" class="small-muted">Passenger</div>
+            <div id="viewPayer" style="font-weight:700">-</div>
+
+            <div style="margin-top:8px" class="small-muted">Amount Paid</div>
+            <div id="viewPrice" style="font-weight:800">₱0.00</div>
+          </div>
+
+          <div style="width:260px">
+            <img id="viewImg" src="Images/logo.jpg" alt="thumb" style="width:100%; height:140px; object-fit:cover; border-radius:8px; border:1px solid rgba(255,255,255,0.03)">
+            <div style="margin-top:10px">
+              <div class="small-muted">Transaction</div>
+              <div id="viewTransaction" style="font-weight:700">-</div>
+              <div style="margin-top:8px" class="small-muted">Date</div>
+              <div id="viewDate" style="font-weight:700">-</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; margin-top:12px">
+          <div class="small-muted">Receipt ID: <span id="viewTransaction_footer">-</span></div>
+          <div style="display:flex; gap:8px">
+            <button class="btn btn-primary" onclick="printTicket()">Print</button>
+            <button class="btn" style="background:transparent;border:1px solid rgba(255,255,255,0.06)" onclick="closeViewModal()">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
+    import { getFirestore, collection, getDocs, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyB7PKVUrQcL-pEeOnn9XU9D3tgK90WkSU8",
+      authDomain: "travelbook-64c34.firebaseapp.com",
+      projectId: "travelbook-64c34",
+      storageBucket: "travelbook-64c34.appspot.com",
+      messagingSenderId: "964725351972",
+      appId: "1:964725351972:web:788b5e8361333723fa5ab1",
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    onAuthStateChanged(auth, (user) => { if(!user) window.location.href = "UserSignup.html"; });
+
+    let bookings = [];
+    const tbody = document.getElementById('tbody');
+    const countEl = document.getElementById('count');
+
+    function formatPHP(value){ if(isNaN(value)) return "₱0.00"; return "₱"+Number(value).toLocaleString("en-PH",{minimumFractionDigits:2,maximumFractionDigits:2}); }
+
+    async function loadBookings(){
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:24px; color:var(--muted)">Loading...</td></tr>`;
+      const snap = await getDocs(collection(db, "receipts"));
+      bookings = [];
+      snap.forEach(d => bookings.push({ id: d.id, ...d.data() }));
+      renderTable(bookings);
+    }
+
+    function renderTable(arr){
+      if(!arr || arr.length === 0){
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:24px; color:var(--muted)">No bookings yet.</td></tr>`;
+        countEl.innerText = '0 bookings';
+        return;
+      }
+      tbody.innerHTML = '';
+      arr.forEach(b => {
+        const price = (typeof b.price === 'number') ? formatPHP(b.price) : (b.price ? formatPHP(Number(b.price)) : '₱0.00');
+        const travelDate = b.date ? new Date(b.date).toLocaleDateString('en-PH', { year:'numeric', month:'short', day:'numeric' }) : (b.travelDate || '-');
+        const status = b.status || 'Not Paid';
+        const img = b.packageImage || 'Images/logo.jpg';
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>
+            <div class="pkg-cell">
+              <img class="pkg-thumb" src="${img}" alt="${b.packageName}">
+              <div>
+                <div style="font-weight:800">${b.packageName || '-'}</div>
+                <div class="small-muted">${b.duration || ''}</div>
+              </div>
+            </div>
+          </td>
+          <td>${b.city || '-'}</td>
+          <td class="small-muted">${travelDate}</td>
+          <td style="font-weight:700">${price}</td>
+          <td>
+            <div style="font-weight:700">${b.payerName || '-'}</div>
+            <div class="small-muted">${b.payerEmail || ''}</div>
+          </td>
+          <td>
+            <select class="status-select" data-id="${b.id}">
+              <option value="Paid">Paid</option>
+              <option value="Not Paid">Not Paid</option>
+            </select>
+          </td>
+          <td style="text-align:right">
+            <button class="btn" onclick="openReceiptModal('${b.id}')">View</button>
+            <button class="btn" style="background:transparent;border:1px solid rgba(255,255,255,0.06)" onclick="deleteBooking('${b.id}')">Delete</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+
+        const sel = tr.querySelector('.status-select');
+        sel.value = status;
+        sel.addEventListener('change', async (e) => {
+          const newStatus = e.target.value;
+          const id = e.target.dataset.id;
+          try {
+            await updateDoc(doc(db, "receipts", id), { status: newStatus });
+            e.target.style.borderColor = '#10b981';
+            setTimeout(()=> e.target.style.borderColor = 'rgba(255,255,255,0.04)', 900);
+            // update local cache
+            const index = bookings.findIndex(x=>x.id===id);
+            if(index>=0) bookings[index].status = newStatus;
+          } catch(err){ console.error(err); alert('Failed to update status.'); e.target.value = (bookings.find(x=>x.id===id)?.status) || 'Not Paid'; }
+        });
+      });
+      countEl.innerText = `${arr.length} bookings`;
+    }
+
+    function filterBookings(){
+      const q = document.getElementById('searchInput').value.toLowerCase();
+      const filtered = bookings.filter(b => 
+        (b.packageName && b.packageName.toLowerCase().includes(q)) ||
+        (b.city && b.city.toLowerCase().includes(q)) ||
+        (b.payerName && b.payerName.toLowerCase().includes(q)) ||
+        (b.payerEmail && b.payerEmail.toLowerCase().includes(q))
+      );
+      renderTable(filtered);
+    }
+
+    async function deleteBooking(id){
+      if(!confirm('Delete booking permanently?')) return;
+      try{
+        await deleteDoc(doc(db, "receipts", id));
+        bookings = bookings.filter(b=>b.id !== id);
+        renderTable(bookings);
+      } catch(err){ console.error(err); alert('Failed to delete booking.'); }
+    }
+
+    // Receipt modal functions (open data from local cache)
+    function openReceiptModal(id){
+      const b = bookings.find(x=>x.id===id);
+      if(!b) return alert('Booking not found.');
+      document.getElementById('viewPackageName').innerText = b.packageName || '-';
+      document.getElementById('viewCity').innerText = b.city || '-';
+      document.getElementById('viewDuration').innerText = b.duration || '-';
+      document.getElementById('viewPayer').innerText = (b.payerName||'-') + ' · ' + (b.payerEmail||'-');
+      document.getElementById('viewPrice').innerText = (typeof b.price==='number') ? formatPHP(b.price) : (b.price ? formatPHP(Number(b.price)) : '₱0.00');
+      document.getElementById('viewImg').src = b.packageImage || 'Images/logo.jpg';
+      document.getElementById('viewTransaction').innerText = b.transactionId || '-';
+      document.getElementById('viewDate').innerText = b.date ? new Date(b.date).toLocaleString('en-PH',{dateStyle:'medium', timeStyle:'short'}) : '-';
+      document.getElementById('viewTransaction_footer').innerText = b.transactionId || '-';
+      document.getElementById('viewModal').classList.add('show');
+    }
+
+    function closeViewModal(){ document.getElementById('viewModal').classList.remove('show'); }
+
+    function printTicket(){
+      const html = document.querySelector('#viewModal .receipt').outerHTML;
+      const css = `body{font-family:Arial;padding:18px;color:black} .receipt{background:white;color:black}`;
+      const w = window.open('','_blank','width=900,height=700');
+      w.document.write(`<html><head><title>Receipt</title><style>${css}</style></head><body>${html}</body></html>`);
+      w.document.close();
+      setTimeout(()=> { w.print(); w.close(); }, 400);
+    }
+
+    window.filterBookings = filterBookings;
+    window.deleteBooking = deleteBooking;
+    window.openReceiptModal = openReceiptModal;
+    window.closeViewModal = closeViewModal;
+    window.printTicket = printTicket;
+
+    // initial load
+    loadBookings();
+
+  </script>
+</body>
+</html>

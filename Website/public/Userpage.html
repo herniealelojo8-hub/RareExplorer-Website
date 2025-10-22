@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Rare Explorer – Travel Packages</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: white;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 15px 30px;
+      background: #1e293b;
+      border-bottom: 1px solid #334155;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-container img {
+      height: 50px;
+      width: auto;
+      border-radius: 50%;
+    }
+
+    .logo-text {
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .search-bar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .search-bar input {
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+    }
+
+    .btn {
+      padding: 8px 14px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .btn-primary {
+      background: linear-gradient(to right, #4f46e5, #06b6d4);
+      color: white;
+    }
+
+    .btn-secondary {
+      background: #475569;
+      color: white;
+    }
+
+    .container {
+      padding: 20px 30px;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    @media (max-width: 900px) { .card-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 600px) { .card-grid { grid-template-columns: 1fr; } }
+
+    .card {
+      background: #1e293b;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+    }
+
+    .card-content { padding: 15px; }
+
+    .tags {
+      display: flex;
+      gap: 8px;
+      margin: 5px 0;
+      flex-wrap: wrap;
+    }
+
+    .tag {
+      background: #334155;
+      padding: 4px 8px;
+      border-radius: 8px;
+      font-size: 12px;
+    }
+
+    .card-footer {
+      display: flex;
+      justify-content: flex-end;
+      padding: 10px 15px;
+      border-top: 1px solid #334155;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      overflow-y: auto;
+      z-index: 1000;
+      padding: 30px 10px;
+      box-sizing: border-box;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-content {
+      background: #1e293b;
+      padding: 20px;
+      border-radius: 12px;
+      width: 400px;
+      max-width: 95%;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+      margin: auto;
+      text-align: center;
+    }
+
+    .modal-content h3 { margin-top: 0; }
+
+    .modal-content input {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 8px;
+      border: none;
+      background: #0f172a;
+      color: white;
+      font-size: 14px;
+    }
+
+    .gcash-qr {
+      width: 150px;
+      height: 150px;
+      margin: 10px auto;
+    }
+  </style>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
+    import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyB7PKVUrQcL-pEeOnn9XU9D3tgK90WkSU8",
+      authDomain: "travelbook-64c34.firebaseapp.com",
+      projectId: "travelbook-64c34",
+      storageBucket: "travelbook-64c34.appspot.com",
+      messagingSenderId: "964725351972",
+      appId: "1:964725351972:web:788b5e8361333723fa5ab1",
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    onAuthStateChanged(auth, (user) => {
+      if (!user) window.location.href = "UserSignup.html";
+    });
+
+    window.logout = function() {
+      signOut(auth).then(() => window.location.href = "browsing.html");
+    };
+
+    let places = [];
+    let selectedPackage = null;
+
+    function formatPHP(value) {
+      return "₱" + value.toLocaleString("en-PH", { minimumFractionDigits: 2 });
+    }
+
+    async function loadPlaces() {
+      const querySnapshot = await getDocs(collection(db, "packages"));
+      places = [];
+      querySnapshot.forEach(d => places.push({ id: d.id, ...d.data() }));
+      renderPlaces();
+    }
+
+    window.renderPlaces = function(filtered = places) {
+      const list = document.getElementById("placeList");
+      list.innerHTML = "";
+      filtered.forEach((p, index) => {
+        list.innerHTML += `
+          <div class="card">
+            <img src="${p.img}" alt="${p.name}">
+            <div class="card-content">
+              <h3>${p.name}</h3>
+              <p>${p.city}</p>
+              <p><i>${p.duration}</i></p>
+              <div class="tags">${p.tags.map(t => `<span class="tag">${t}</span>`).join("")}</div>
+              <p><b>${formatPHP(p.price)}</b> / person</p>
+            </div>
+            <div class="card-footer">
+              <button class="btn btn-primary" onclick="openPayment(${index})">Book</button>
+            </div>
+          </div>
+        `;
+      });
+      document.getElementById("stats").innerText = `${places.length} packages`;
+    };
+
+    window.clearSearch = function() {
+      document.getElementById("search").value = "";
+      renderPlaces();
+    };
+
+    window.searchPlaces = function() {
+      const query = document.getElementById("search").value.toLowerCase();
+      const filtered = places.filter(p => p.name.toLowerCase().includes(query) || p.city.toLowerCase().includes(query));
+      renderPlaces(filtered);
+    };
+
+    // Payment modal
+    window.openPayment = function(index) {
+      selectedPackage = places[index];
+      document.getElementById("payer-name").value = "";
+      document.getElementById("payer-contact").value = "";
+      document.getElementById("payer-members").value = "";
+      document.getElementById("paymentModal").style.display = "flex";
+    };
+
+    window.closeModal = function() {
+      document.getElementById("paymentModal").style.display = "none";
+    };
+
+    loadPlaces();
+  </script>
+</head>
+<body>
+<header>
+  <div class="logo-container">
+    <img src="Images/logo.jpg" alt="Rare Explorer Logo">
+    <span class="logo-text">RareExplorer Travel & Tours</span>
+  </div>
+  <div class="search-bar">
+    <input type="text" id="search" placeholder="Search package or city..." onkeyup="searchPlaces()">
+    <button class="btn btn-secondary" onclick="clearSearch()">Clear</button>
+    <button class="btn btn-primary" onclick="logout()">Logout</button>
+  </div>
+</header>
+
+<div class="container">
+  <div id="stats"></div>
+  <div id="placeList" class="card-grid"></div>
+</div>
+
+<!-- Payment Modal -->
+<div id="paymentModal" class="modal">
+  <div class="modal-content">
+    <h3>Book Your Trip</h3>
+    <input type="text" id="payer-name" placeholder="Full Name" required>
+    <input type="text" id="payer-contact" placeholder="Contact Number" required>
+    <input type="number" id="payer-members" placeholder="Number of People" required>
+    <p>Scan this QR code to pay:</p>
+    <img class="gcash-qr" src="Images/gcashqr.jpg" alt="GCash QR Code">
+    <p>After paying, send a screenshot of your payment to our email or Facebook page:</p>
+    <p>
+      <strong>Email:</strong> <a href="mailto:rareexplorer14@gmail.com" style="color:#38bdf8;">rareexplorer14@gmail.com</a><br>
+      <strong>Facebook:</strong> <a href="https://www.facebook.com/RaRe.explorer14/" target="_blank" style="color:#38bdf8;">RaRe Explorer</a>
+    </p>
+    <br>
+    <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+  </div>
+</div>
+</body>
+</html>

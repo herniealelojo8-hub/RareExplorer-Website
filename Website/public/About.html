@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Rare Explorer – About Us</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#0f172a;
+      --card:#111827;
+      --muted:#9ca3af;
+      --accent:#06b6d4;
+      --accent-2:#0891b2;
+      --white:#e6eef6;
+      --radius:12px;
+      --max-width:1200px;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;height:100%;font-family:"Inter", Arial, sans-serif;background:linear-gradient(180deg,#071026,#081428);color:var(--white)}
+    a{color:inherit;text-decoration:none}
+    img{display:block;max-width:100%}
+    .container{width:100%;max-width:var(--max-width);margin:0 auto;padding:0 20px}
+
+    /* Header */
+    header.site-header{position:sticky;top:0;z-index:1200;backdrop-filter:blur(8px) saturate(120%);background: linear-gradient(180deg, rgba(7,10,17,0.55), rgba(7,10,17,0.35));border-bottom:1px solid rgba(255,255,255,0.04);transition: box-shadow 220ms ease, background 220ms ease, transform 220ms ease;}
+    header.site-header.scrolled{box-shadow: 0 10px 30px rgba(2,6,23,0.6);background: linear-gradient(180deg, rgba(7,10,17,0.75), rgba(7,10,17,0.6));}
+    .nav-inner{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:14px 20px;max-width:var(--max-width);margin:0 auto}
+    .brand{display:flex;align-items:center;gap:12px}
+    .brand .logo{width:48px;height:48px;border-radius:12px;overflow:hidden;border:2px solid rgba(6,182,212,0.12);background:linear-gradient(135deg, rgba(6,182,212,0.08), rgba(8,145,178,0.03))}
+    .brand .logo img{width:100%;height:100%;object-fit:cover}
+    .brand .title{display:flex;flex-direction:column;line-height:1}
+    .brand .title .name{font-weight:700;font-size:16px;color:var(--white)}
+    .brand .title .tag{font-size:12px;color:var(--muted);margin-top:2px}
+    nav.primary-nav{display:flex;gap:20px;align-items:center}
+    nav.primary-nav a{font-weight:600;font-size:15px;padding:8px 6px;position:relative}
+    nav.primary-nav a:hover{color:var(--accent)}
+    nav.primary-nav a::after{content:"";position:absolute;left:0;right:0;bottom:-6px;height:2px;background:var(--accent);transform:scaleX(0);transform-origin:center;transition: transform 220ms ease;opacity:0.95}
+    nav.primary-nav a:hover::after{transform:scaleX(1)}
+    .btn{display:inline-flex;align-items:center;gap:8px;padding:9px 14px;border-radius:10px;font-weight:700;border:0;cursor:pointer}
+    .btn-primary{background:linear-gradient(180deg,var(--accent),var(--accent-2));color:#042027}
+    .btn-primary:hover{transform:translateY(-2px)}
+    .btn-ghost{background:transparent;color:var(--white);border:1px solid rgba(255,255,255,0.04);padding:8px 12px;font-weight:600}
+    .hamburger{display:none;width:44px;height:44px;border-radius:10px;align-items:center;justify-content:center;background:transparent;border:0;cursor:pointer}
+    .hamburger .lines{width:22px;height:2px;background:var(--white);position:relative;transition:all 220ms ease}
+    .hamburger .lines::before,.hamburger .lines::after{content:"";position:absolute;left:0;width:22px;height:2px;background:var(--white);transition:all 220ms ease}
+    .hamburger .lines::before{top:-7px}
+    .hamburger .lines::after{top:7px}
+    .hamburger.open .lines{background:transparent}
+    .hamburger.open .lines::before{transform:translateY(7px) rotate(45deg)}
+    .hamburger.open .lines::after{transform:translateY(-7px) rotate(-45deg)}
+
+    .hero{min-height:50vh;display:grid;place-items:center;text-align:center;padding:80px 20px;background-image:linear-gradient(180deg, rgba(2,6,23,0.2), rgba(2,6,23,0.35)), url('Images/AboutHero.jpg');background-size:cover;background-position:center;position:relative}
+    .hero h1{font-size:44px;margin:0 0 12px}
+    .hero p.lead{color:var(--muted);font-size:18px;max-width:65ch;margin:0 auto}
+
+    section.about{padding:64px 20px}
+    section.about h2{font-size:32px;margin-bottom:18px;color:var(--accent)}
+    section.about p{color:var(--muted);line-height:1.6;font-size:16px;margin-bottom:18px}
+    .about-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center;margin-top:40px}
+    .about-grid img{border-radius:var(--radius);width:100%;height:auto;object-fit:cover;box-shadow:0 10px 30px rgba(2,6,23,0.6)}
+
+    /* Footer */
+    footer.site-footer{margin-top:48px;padding:48px 20px;background:linear-gradient(180deg,#071026,#061122);border-top:1px solid rgba(255,255,255,0.03)}
+    .footer-grid{display:flex;gap:40px;max-width:var(--max-width);margin:0 auto;padding:0 20px;flex-wrap:wrap}
+    .footer-col{min-width:220px;flex:1}
+    .footer-col h4{color:var(--accent);margin-bottom:12px}
+    .footer-col p{color:var(--muted);line-height:1.5;font-size:14px}
+    .socials{display:flex;gap:10px;margin-top:8px}
+    .socials a{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.02)}
+
+    @media(max-width:900px){
+      .about-grid{grid-template-columns:1fr}
+      .hero h1{font-size:32px}
+      .hero p.lead{font-size:16px}
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="site-header" id="siteHeader" role="banner">
+    <div class="nav-inner">
+      <div class="brand">
+        <div class="logo"><img src="Images/logo.jpg" alt="Rare Explorer logo"></div>
+        <div class="title">
+          <div class="name">RareExplorer</div>
+          <div class="tag">Travel & Tours</div>
+        </div>
+      </div>
+
+      <nav class="primary-nav" id="primaryNav">
+        <a href="Index.html">Home</a>
+        <a href="About.html">About</a>
+        <a href="Packages.html">Packages</a>
+        <a href="#footer">Contact</a>
+        <a href="UserSignup.html">Sign Up</a>
+      </nav>
+
+      <div class="nav-actions">
+        <button class="btn btn-ghost" onclick="location.href='tel:09150091980'">Call: 0915-009-1980</button>
+        <a class="btn btn-primary" href="https://wa.me/639150091980" target="_blank">Book Now</a>
+      </div>
+
+      <button class="hamburger" id="hamburgerBtn"><span class="lines"></span></button>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="container">
+      <h1>About Rare Explorer</h1>
+      <p class="lead">We create unforgettable journeys across the Philippines and Asia with a focus on quality, comfort, and local experiences.</p>
+    </div>
+  </section>
+
+  <section class="about container">
+    <h2>Our Story</h2>
+    <p>Founded in 2020, Rare Explorer aims to connect travelers with the hidden gems of the Philippines and Asia. We combine curated itineraries with trusted local guides to provide authentic, hassle-free travel experiences.</p>
+
+    <div class="about-grid">
+      <img src="Images/Japan.jpg" alt="Japan">
+      <div>
+        <h2>Mission & Vision</h2>
+        <p><strong>Mission:</strong> To provide safe, exciting, and memorable travel experiences for all types of travelers.</p>
+        <p><strong>Vision:</strong> To become the most trusted travel company for discovering the beauty and culture of Asia and the Philippines.</p>
+      </div>
+    </div>
+
+    <div class="about-grid" style="margin-top:40px">
+      <div>
+        <h2>Why Choose Us?</h2>
+        <p>• Hand-picked packages with local insight.</p>
+        <p>• Flexible dates and small group sizes for personalized experiences.</p>
+        <p>• Affordable pricing without compromising quality.</p>
+      </div>
+      <img src="Images/batanes.jpg" alt="Adventure travel with Rare Explorer">
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="site-footer" id="footer" role="contentinfo">
+    <div class="footer-grid">
+      <div class="footer-col">
+        <h4>Rare Explorer</h4>
+        <p class="muted">We help you explore hidden gems with curated trips and trusted local guides.</p>
+        <div class="socials">
+          <a href="#"><img src="Images/facebook.jfif" alt="facebook" style="width:20px"></a>
+          <a href="#"><img src="Images/tiktok.png" alt="tiktok" style="width:20px"></a>
+          <a href="#"><img src="Images/download.jfif" alt="instagram" style="width:20px"></a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Contact</h4>
+        <p class="muted"><strong>Address:</strong> Quezon City, Philippines</p>
+        <p class="muted"><strong>Mobile:</strong> <a href="tel:09150091980" style="color:var(--accent)">0915-009-1980</a></p>
+        <p class="muted"><strong>Email:</strong> <a href="mailto:rareexplorer14@gmail.com" style="color:var(--accent)">rareexplorer14@gmail.com</a></p>
+      </div>
+    </div>
+    <div style="max-width:var(--max-width);margin:20px auto 0;padding:0 20px;color:var(--muted);text-align:center;font-size:14px">
+      &copy; <span id="yearLabel"></span> Rare Explorer Travel & Tours. All rights reserved.
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('yearLabel').textContent = new Date().getFullYear();
+
+    const btn = document.getElementById('hamburgerBtn');
+    const nav = document.getElementById('primaryNav');
+    btn.addEventListener('click', () => {
+      btn.classList.toggle('open');
+      if(btn.classList.contains('open')){
+        nav.style.display = 'flex'; 
+        nav.style.position = 'fixed'; 
+        nav.style.top = '72px'; 
+        nav.style.right = '16px'; 
+        nav.style.flexDirection = 'column';
+        nav.style.background = 'linear-gradient(180deg, rgba(7,10,17,0.95), rgba(7,10,17,0.98))'; 
+        nav.style.padding = '16px'; 
+        nav.style.borderRadius = '12px'; 
+        nav.style.zIndex = 1600;
+      } else { 
+        nav.removeAttribute('style'); 
+      }
+    });
+
+    const header = document.getElementById('siteHeader');
+    window.addEventListener('scroll', () => {
+      if(window.scrollY>20) header.classList.add('scrolled'); 
+      else header.classList.remove('scrolled');
+    });
+  </script>
+</body>
+</html>

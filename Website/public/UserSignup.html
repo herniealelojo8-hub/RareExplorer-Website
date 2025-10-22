@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rare Explorer – Travel Booking</title>
+<style>
+/* -------------------- STYLES -------------------- */
+body {
+  margin: 0;
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: url("https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1600&q=80") no-repeat center center fixed;
+  background-size: cover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  color: #fff;
+}
+.overlay {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(15, 23, 42, 0.75);
+  z-index: 1;
+}
+.login-container {
+  position: relative;
+  z-index: 2;
+  background: rgba(30, 41, 59, 0.95);
+  padding: 40px 30px;
+  border-radius: 20px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+.logo {
+  font-size: 32px;
+  font-weight: bold;
+  margin-bottom: 15px;
+  background: linear-gradient(to right, #06b6d4, #490bf5);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.tagline { font-size: 14px; margin-bottom: 25px; color: #fff; font-style: italic; }
+h2 { margin-bottom: 20px; font-size: 24px; font-weight: bold; transition: opacity 0.4s, transform 0.4s; }
+.input-group { margin-bottom: 18px; text-align: left; position: relative; }
+.input-group label { display: block; margin-bottom: 6px; font-size: 14px; font-weight: bold; color: #cbd5e1; }
+.input-group input {
+  width: 100%; padding: 12px; border: none; border-radius: 10px;
+  font-size: 15px; background: #0f172a; color: white; outline: none; box-sizing: border-box;
+}
+.toggle-password {
+  position: absolute; right: 12px; top: 38px; cursor: pointer;
+  font-size: 14px; color: #38bdf8; user-select: none;
+}
+.btn {
+  width: 100%; padding: 12px; border: none; border-radius: 10px;
+  font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px;
+  transition: 0.3s; background: linear-gradient(to right, #06b6d4, #490bf5);
+  color: white; box-shadow: 0 4px 15px rgba(6, 182, 212, 0.4);
+}
+.btn:hover { transform: scale(1.03); opacity: 0.95; }
+.extra-links { text-align: center; margin-top: 15px; font-size: 14px; word-wrap: break-word; }
+.extra-links a { color: #38bdf8; text-decoration: none; cursor: pointer; }
+.extra-links a:hover { text-decoration: underline; }
+#message { margin-top: 15px; font-size: 14px; color: #f87171; min-height: 20px; word-wrap: break-word; }
+.fade { opacity: 0; transform: translateY(-10px); pointer-events: none; transition: opacity 0.4s, transform 0.4s; }
+.fade.show { opacity: 1; transform: translateY(0); pointer-events: all; }
+.back-text { position: absolute; bottom: 15px; left: 20px; font-size: 14px; color: #38bdf8; cursor: pointer; user-select: none; }
+.back-text:hover { text-decoration: underline; }
+.modal {
+  display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.6); z-index: 999; align-items: center; justify-content: center;
+  padding: 15px; box-sizing: border-box;
+}
+.modal-content {
+  background: #1e293b; padding: 25px 20px; border-radius: 15px; width: 100%;
+  max-width: 350px; text-align: center; color: white; box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+  box-sizing: border-box;
+}
+.modal-content h3 { margin-bottom: 10px; }
+.modal-content input {
+  width: 100%; padding: 10px; margin: 12px 0; border: none; border-radius: 8px;
+  background: #0f172a; color: white; box-sizing: border-box;
+}
+.btn.secondary { background: #64748b; margin-top: 8px; }
+.btn.secondary:hover { opacity: 0.9; }
+@media (max-width: 480px) {
+  .login-container { padding: 30px 20px; }
+  .logo { font-size: 28px; } h2 { font-size: 22px; }
+  .btn { font-size: 15px; padding: 10px; }
+  .input-group input { padding: 10px; font-size: 14px; }
+}
+@media (max-width: 350px) {
+  .login-container { padding: 25px 15px; }
+  h2 { font-size: 20px; } .logo { font-size: 26px; }
+  .btn { font-size: 14px; padding: 8px; }
+}
+</style>
+</head>
+<body>
+<div class="overlay"></div>
+<div class="login-container">
+  <div class="logo">Rare Explorer</div>
+  <p class="tagline">Your journey begins here ✈️</p>
+  <h2 id="form-title" class="fade show">Login</h2>
+  <form id="auth-form" class="fade show">
+    <div class="input-group">
+      <label for="email">Email</label>
+      <input type="email" id="email" placeholder="Enter your email" required>
+    </div>
+    <div class="input-group">
+      <label for="password">Password</label>
+      <input type="password" id="password" placeholder="Enter your password" required>
+      <span class="toggle-password" data-target="password">Show</span>
+    </div>
+    <div class="input-group" id="confirm-group" style="display:none;">
+      <label for="confirm">Confirm Password</label>
+      <input type="password" id="confirm" placeholder="Confirm your password">
+      <span class="toggle-password" data-target="confirm">Show</span>
+    </div>
+    <!-- Signup Verification -->
+    <div class="input-group" id="verify-group" style="display:none;">
+      <label for="verify-code">Enter Verification Code</label>
+      <input type="text" id="verify-code" placeholder="Enter 6-digit code">
+    </div>
+    <button type="submit" class="btn" id="submit-btn">Login</button>
+    <button type="button" class="btn" id="verify-btn" style="display:none;">Verify & Create Account</button>
+  </form>
+  <div class="extra-links fade show" id="extra-links">
+    <p id="toggle-text">Don’t have an account? <a id="toggle-link">Sign Up</a></p>
+    <p><a id="forgot-link">Forgot Password?</a></p>
+  </div>
+  <div id="message"></div>
+  <p class="back-text" onclick="window.location.href='index.html'">← Back</p>
+</div>
+
+<!-- Forgot Password Modal -->
+<div id="forgot-modal" class="modal">
+  <div class="modal-content">
+    <h3>Reset Password</h3>
+    <p>Enter your email to receive a verification code:</p>
+    <input type="email" id="reset-email" placeholder="Enter your email" required>
+    <div class="input-group" id="reset-verify-group" style="display:none;">
+      <label for="reset-code">Enter Verification Code</label>
+      <input type="text" id="reset-code" placeholder="Enter 6-digit code">
+    </div>
+    <div class="input-group" id="reset-newpass-group" style="display:none;">
+      <label for="reset-newpass">Enter New Password</label>
+      <input type="password" id="reset-newpass" placeholder="New Password">
+    </div>
+    <button id="reset-send-btn" class="btn">Send Code</button>
+    <button id="reset-verify-btn" class="btn" style="display:none;">Verify & Reset</button>
+    <button id="close-btn" class="btn secondary">Cancel</button>
+    <p id="reset-message"></p>
+  </div>
+</div>
+
+<!-- Firebase & EmailJS -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyB7PKVUrQcL-pEeOnn9XU9D3tgK90WkSU8",
+  authDomain: "travelbook-64c34.firebaseapp.com",
+  projectId: "travelbook-64c34",
+  storageBucket: "travelbook-64c34.appspot.com",
+  messagingSenderId: "964725351972",
+  appId: "1:964725351972:web:788b5e8361333723fa5ab1"
+};
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+// Elements
+const form = document.getElementById("auth-form");
+const formTitle = document.getElementById("form-title");
+const submitBtn = document.getElementById("submit-btn");
+const toggleText = document.getElementById("toggle-text");
+const toggleLink = document.getElementById("toggle-link");
+const forgotLink = document.getElementById("forgot-link");
+const message = document.getElementById("message");
+const confirmGroup = document.getElementById("confirm-group");
+const confirmInput = document.getElementById("confirm");
+const verifyGroup = document.getElementById("verify-group");
+const verifyInput = document.getElementById("verify-code");
+const verifyBtn = document.getElementById("verify-btn");
+
+const resetModal = document.getElementById("forgot-modal");
+const resetEmailInput = document.getElementById("reset-email");
+const resetSendBtn = document.getElementById("reset-send-btn");
+const resetVerifyBtn = document.getElementById("reset-verify-btn");
+const resetMessage = document.getElementById("reset-message");
+const resetCodeInput = document.getElementById("reset-code");
+const resetVerifyGroup = document.getElementById("reset-verify-group");
+const resetNewPassGroup = document.getElementById("reset-newpass-group");
+const resetNewPassInput = document.getElementById("reset-newpass");
+
+let isLogin = true;
+let verificationCode = "";
+let pendingSignUp = null;
+let resetVerificationCode = "";
+
+// Smooth switch between login/signup
+function smoothSwitch(newTitle, newBtn, newToggle, showConfirm) {
+  [formTitle, form, document.getElementById("extra-links")].forEach(el => el.classList.remove("show"));
+  setTimeout(() => {
+    formTitle.textContent = newTitle;
+    submitBtn.textContent = newBtn;
+    toggleText.innerHTML = newToggle;
+    document.querySelector("#toggle-link").addEventListener("click", toggleMode);
+    confirmGroup.style.display = showConfirm ? "block" : "none";
+    verifyGroup.style.display = "none";
+    verifyBtn.style.display = "none";
+    form.querySelectorAll("input").forEach(i => i.disabled = false);
+    form.reset();
+    message.textContent = "";
+    [formTitle, form, document.getElementById("extra-links")].forEach(el => el.classList.add("show"));
+  }, 400);
+}
+
+function toggleMode() {
+  isLogin = !isLogin;
+  if(isLogin) {
+    smoothSwitch("Login", "Login", `Don’t have an account? <a id="toggle-link">Sign Up</a>`, false);
+  } else {
+    smoothSwitch("Sign Up", "Sign Up", `Already have an account? <a id="toggle-link">Login</a>`, true);
+  }
+}
+toggleLink.addEventListener("click", toggleMode);
+
+// Send email via EmailJS
+function sendEmailJS(email, code) {
+  emailjs.send('service_1vbw5mr','template_96coyra',{to_email: email, code: code})
+    .then(()=>console.log('Email sent')).catch(err=>console.error(err));
+}
+
+// Login / Signup submit
+form.addEventListener("submit", async e => {
+  e.preventDefault();
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  if(isLogin){
+    try{
+      await signInWithEmailAndPassword(auth, email, password);
+      message.style.color = "#4ade80";
+      message.textContent = "Login successful!";
+      setTimeout(()=>{ window.location.href="Userpage.html"; },1000);
+    }catch(err){
+      message.style.color="#f87171"; message.textContent="⚠️ "+err.message;
+    }
+  } else {
+    if(password!==confirmInput.value){
+      message.style.color="#f87171"; message.textContent="⚠️ Passwords do not match."; return;
+    }
+    if(verifyGroup.style.display==="none"){
+      pendingSignUp={email,password};
+      verificationCode=Math.floor(100000+Math.random()*900000).toString();
+      sendEmailJS(email,verificationCode);
+      verifyGroup.style.display="block";
+      verifyBtn.style.display="block";
+      form.querySelectorAll("input:not(#verify-code)").forEach(i=>i.disabled=true);
+      message.style.color="#38bdf8"; message.textContent="Verification code sent to your email!";
+      return;
+    }
+  }
+});
+
+// Verify signup code
+verifyBtn.addEventListener("click", async () => {
+  const enteredCode = verifyInput.value;
+  if(enteredCode!==verificationCode){
+    message.style.color="#f87171"; message.textContent="⚠️ Incorrect verification code."; return;
+  }
+  try{
+    await createUserWithEmailAndPassword(auth,pendingSignUp.email,pendingSignUp.password);
+    message.style.color="#4ade80"; message.textContent="🎉 Account created successfully!";
+    setTimeout(()=>toggleMode(),1200);
+    verifyGroup.style.display="none"; verifyBtn.style.display="none";
+    form.querySelectorAll("input:not(#verify-code)").forEach(i=>i.disabled=false);
+    pendingSignUp=null; verificationCode="";
+  }catch(err){
+    message.style.color="#f87171"; message.textContent="⚠️ "+err.message;
+  }
+});
+
+// Toggle password visibility
+document.querySelectorAll(".toggle-password").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    const target=document.getElementById(btn.dataset.target);
+    if(target.type==="password"){target.type="text"; btn.textContent="Hide";}
+    else{target.type="password"; btn.textContent="Show";}
+  });
+});
+
+// Forgot password modal
+forgotLink.addEventListener("click", ()=>{
+  resetModal.style.display="flex";
+  resetMessage.textContent="";
+  resetEmailInput.value="";
+  resetVerifyGroup.style.display="none"; resetNewPassGroup.style.display="none";
+  resetSendBtn.style.display="block"; resetVerifyBtn.style.display="none";
+});
+document.getElementById("close-btn").addEventListener("click",()=>resetModal.style.display="none");
+
+// Send verification code for password reset
+resetSendBtn.addEventListener("click", async ()=>{
+  const email = resetEmailInput.value; if(!email){ resetMessage.textContent="⚠️ Enter your email."; return;}
+  resetVerificationCode = Math.floor(100000+Math.random()*900000).toString();
+  try{
+    await emailjs.send('service_1vbw5mr','template_mfv10mr',{to_email:email,code:resetVerificationCode});
+    resetMessage.style.color="#38bdf8"; resetMessage.textContent="Verification code sent!";
+    resetVerifyGroup.style.display="block"; resetNewPassGroup.style.display="block";
+    resetSendBtn.style.display="none"; resetVerifyBtn.style.display="block";
+  }catch(err){ resetMessage.style.color="#f87171"; resetMessage.textContent="⚠️ Failed to send email."; console.error(err);}
+});
+
+// Verify code & reset password
+resetVerifyBtn.addEventListener("click", async ()=>{
+  const code = resetCodeInput.value; const newPass = resetNewPassInput.value;
+  if(code!==resetVerificationCode){ resetMessage.style.color="#f87171"; resetMessage.textContent="⚠️ Incorrect code."; return;}
+  if(!newPass){ resetMessage.style.color="#f87171"; resetMessage.textContent="⚠️ Enter new password."; return;}
+  try{
+    await sendPasswordResetEmail(auth, resetEmailInput.value);
+    resetMessage.style.color="#4ade80"; resetMessage.textContent="✅ Password reset email sent!";
+    setTimeout(()=>resetModal.style.display="none",1500);
+  }catch(err){ resetMessage.style.color="#f87171"; resetMessage.textContent="⚠️ "+err.message;}
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+<script>emailjs.init("kOgrbxu1e0qiwzkHC");</script>
+</body>
+</html>

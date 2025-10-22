@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Rare Explorer – Packages</title>
+  <style>
+    :root{ --bg:#0f172a; --card:#1e293b; --muted:#94a3b8; --accent:#06b6d4; }
+    body{ margin:0; font-family:Arial, sans-serif; background:#0f172a; color:white; }
+    header{ display:flex; align-items:center; justify-content:space-between; padding:14px 20px; background:#111827; border-bottom:1px solid rgba(255,255,255,0.03); gap:12px; flex-wrap:wrap }
+    .brand{display:flex;align-items:center;gap:12px}
+    .brand img{height:44px;border-radius:8px}
+    nav.primary{display:flex;gap:10px;align-items:center}
+    nav.primary a{ color: #e6eef8; text-decoration:none; padding:8px 10px; border-radius:8px; font-weight:700 }
+    nav.primary a:hover{ color: var(--accent) }
+    .container{ max-width:1200px; margin:20px auto; padding:0 20px; }
+    .flex-header{ display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap }
+    .card-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin-top:16px }
+    @media(max-width:900px){ .card-grid{grid-template-columns:repeat(2,1fr)} }
+    @media(max-width:600px){ .card-grid{grid-template-columns:1fr} }
+    .card{ background:var(--card); border-radius:12px; overflow:hidden; display:flex; flex-direction:column; box-shadow:0 8px 24px rgba(0,0,0,0.5) }
+    .card img{ width:100%; height:160px; object-fit:cover; }
+    .card-content{ padding:12px 14px; }
+    .card-footer{ display:flex; gap:8px; justify-content:flex-end; padding:10px 12px; border-top:1px solid rgba(255,255,255,0.03) }
+    .btn{ padding:8px 12px; border-radius:8px; border:0; cursor:pointer; font-weight:700 }
+    .btn-primary{ background:linear-gradient(90deg,#4f46e5,#06b6d4); color:#042027 }
+    .btn-secondary{ background:#475569; color:white }
+    .btn-danger{ background:#dc2626; color:white }
+    .muted{ color:var(--muted); font-size:13px }
+    .search-wrapper{ display:flex; align-items:center; gap:8px; background:#0b1220; border-radius:10px; padding:6px 8px; border:1px solid rgba(255,255,255,0.02) }
+    .search-input{ background:transparent; border:0; outline:none; color:#e6eef8; padding:8px; width:260px; font-weight:600; border-radius:6px }
+    .search-input::placeholder{ color: #9fb2c6; font-weight:500 }
+    .search-icon{ width:18px; height:18px; opacity:0.9 }
+    @media(max-width:760px){ .search-input{ width:160px } .card-grid{ grid-template-columns:repeat(2,1fr) } }
+    @media(max-width:480px){ .search-input{ width:120px } .flex-header{ flex-direction:column; align-items:stretch } .search-wrapper{ width:100% } .actions-row{ width:100%; display:flex; justify-content:flex-end } }
+
+    .modal{ display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:1200; padding:20px; box-sizing:border-box; overflow:auto }
+    .modal.show{ display:flex; align-items:center; justify-content:center }
+    .modal-card{ width:520px; max-width:96%; background:linear-gradient(180deg,#0f172a,#071023); border-radius:12px; padding:18px; box-shadow:0 12px 42px rgba(0,0,0,0.6); border:1px solid rgba(255,255,255,0.03); color:#e6eef8; position:relative }
+    .close-x{ position:absolute; top:12px; right:14px; background:transparent; border:none; color:#cfe8ff; font-size:20px; cursor:pointer }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <img src="Images/logo.jpg" alt="RareExplorer">
+      <div><div style="font-weight:800">RareExplorer</div><div class="muted" style="font-size:13px">Travel & Tours</div></div>
+    </div>
+
+    <nav class="primary" aria-label="Main nav">
+      <a href="indexadmin.html">Home</a>
+      <a href="Aboutadmin.html">About</a>
+      <a href="Packages.html">Packages</a>
+      <a href="Bookings.html">BookList</a>
+      <a href="Adminsignup.html">Sign Up</a>
+      <a href="Adminsignup.html">Log Out</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <div class="flex-header">
+      <div id="stats">Loading…</div>
+
+      <div style="display:flex; gap:8px; align-items:center" class="actions-row">
+        <div class="search-wrapper" role="search" aria-label="Search packages">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M21 21l-4.35-4.35" stroke="#9fb2c6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="11" cy="11" r="6" stroke="#9fb2c6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <input id="searchInput" class="search-input" type="search" placeholder="Search packages..." aria-label="Search packages" />
+        </div>
+
+        <button class="btn btn-primary" onclick="openAdd()">+ Add Package</button>
+      </div>
+    </div>
+
+    <div id="placeList" class="card-grid" aria-live="polite"></div>
+  </main>
+
+  <!-- EDIT / ADD MODALS -->
+  <div id="editModal" class="modal" aria-hidden="true">
+    <div class="modal-card">
+      <button class="close-x" onclick="closeEditModal()">✕</button>
+      <h3>Edit Package</h3>
+      <div style="margin-top:10px">
+        <input id="editName" placeholder="Name" style="width:100%; padding:10px; border-radius:8px; border:none; background:#071023; color:#e6eef8">
+        <input id="editCity" placeholder="City" style="width:100%; padding:10px; border-radius:8px; border:none; background:#071023; color:#e6eef8; margin-top:8px">
+        <input id="editDuration" placeholder="Duration" style="width:100%; padding:10px; border-radius:8px; border:none; background:#071023; color:#e6eef8; margin-top:8px">
+        <input id="editPrice" type="number" placeholder="Price" style="width:100%; padding:10px; border-radius:8px; border:none; background:#071023; color:#e6eef8; margin-top:8px">
+        <input id="editImg" placeholder="Image URL" style="width:100%; padding:10px; border-radius:8px; border:none; background:#071023; color:#e6eef8; margin-top:8px">
+        <input id="editTags" placeholder="Tags (comma separated)" style="width:100%; padding:10px; border-radius:8px; border:none; background:#071023; color:#e6eef8; margin-top:8px">
+      </div>
+      <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:12px">
+        <button class="btn btn-primary" onclick="saveEdit()">Save</button>
+        <button class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="addModal" class="modal" aria-hidden="true">
+    <div class="modal-card">
+      <button class="close-x" onclick="closeAddModal()">✕</button>
+      <h3>Add Package</h3>
+      <div style="margin-top:10px">
+        <input id="addName" placeholder="Name" style="width:100%; padding:10px; border-radius:8px; border:none; background:#071023; color:#e6eef8">
+        <input id="addCity" placeholder="City" style="width:100%; padding:10px; border-radius:8px; border:none; background:#071023; color:#e6eef8; margin-top:8px">
+        <input id="addDuration" placeholder="Duration" style="width:100%; padding:10px; border-radius:8px; border:none; background:#071023; color:#e6eef8; margin-top:8px">
+        <input id="addPrice" type="number" placeholder="Price" style="width:100%; padding:10px; border-radius:8px; border:none; background:#071023; color:#e6eef8; margin-top:8px">
+        <input id="addImg" placeholder="Image URL" style="width:100%; padding:10px; border-radius:8px; border:none; background:#071023; color:#e6eef8; margin-top:8px">
+        <input id="addTags" placeholder="Tags (comma separated)" style="width:100%; padding:10px; border-radius:8px; border:none; background:#071023; color:#e6eef8; margin-top:8px">
+      </div>
+      <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:12px">
+        <button class="btn btn-primary" onclick="saveAdd()">Add</button>
+        <button class="btn btn-secondary" onclick="closeAddModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
+    import { getFirestore, collection, getDocs, addDoc, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyB7PKVUrQcL-pEeOnn9XU9D3tgK90WkSU8",
+      authDomain: "travelbook-64c34.firebaseapp.com",
+      projectId: "travelbook-64c34",
+      storageBucket: "travelbook-64c34.appspot.com",
+      messagingSenderId: "964725351972",
+      appId: "1:964725351972:web:788b5e8361333723fa5ab1",
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    onAuthStateChanged(auth, (user) => { if (!user) window.location.href = "UserSignup.html"; });
+
+    window.logout = () => signOut(auth).then(()=> window.location.href = "browsing.html");
+
+    let places = [], editPackageId = null;
+
+    function formatPHP(v){ if(isNaN(v)) return "₱0.00"; return "₱"+Number(v).toLocaleString("en-PH",{minimumFractionDigits:2,maximumFractionDigits:2}); }
+
+    async function loadPlaces(){
+      const snap = await getDocs(collection(db, "packages"));
+      places = [];
+      snap.forEach(d => places.push({ id: d.id, ...d.data() }));
+      renderPlaces();
+    }
+
+    window.renderPlaces = function(filtered = places){
+      const list = document.getElementById("placeList"); list.innerHTML = "";
+      if(!filtered.length){
+        list.innerHTML = `<div class="no-results">No packages found.</div>`;
+      }else{
+        filtered.forEach((p) => {
+          list.innerHTML += `
+            <div class="card" data-id="${p.id}">
+              <img src="${p.img || 'Images/logo.jpg'}" alt="${(p.name||'Package')}">
+              <div class="card-content">
+                <div style="font-weight:800">${p.name || '-'}</div>
+                <div class="muted">${p.city || '-'} · <i>${p.duration || '-'}</i></div>
+                <div style="margin-top:6px; font-weight:700">${formatPHP(p.price)}</div>
+                <div style="margin-top:6px">${p.tags ? p.tags.map(t=>`<span class='muted'>#${t}</span>`).join(' ') : ''}</div>
+              </div>
+              <div class="card-footer">
+                <button class="btn btn-primary" onclick="openEdit('${p.id}')">Edit</button>
+                <button class="btn btn-danger" onclick="removePackage('${p.id}')">Delete</button>
+              </div>
+            </div>`;
+        });
+      }
+      document.getElementById("stats").textContent = `${filtered.length} packages`;
+    }
+
+    window.searchInput.oninput = () => {
+      const q = window.searchInput.value.toLowerCase();
+      renderPlaces(places.filter(p => p.name.toLowerCase().includes(q) || (p.city||'').toLowerCase().includes(q) || (p.tags||[]).some(t=>t.toLowerCase().includes(q))));
+    }
+
+    window.openEdit = (id)=>{
+      editPackageId=id;
+      const p = places.find(p=>p.id===id);
+      document.getElementById("editName").value = p.name||'';
+      document.getElementById("editCity").value = p.city||'';
+      document.getElementById("editDuration").value = p.duration||'';
+      document.getElementById("editPrice").value = p.price||'';
+      document.getElementById("editImg").value = p.img||'';
+      document.getElementById("editTags").value = (p.tags||[]).join(',');
+      document.getElementById("editModal").classList.add("show");
+    }
+
+    window.closeEditModal = ()=>document.getElementById("editModal").classList.remove("show");
+
+    window.saveEdit = async ()=>{
+      if(!editPackageId) return;
+      await updateDoc(doc(db,"packages",editPackageId),{
+        name: document.getElementById("editName").value,
+        city: document.getElementById("editCity").value,
+        duration: document.getElementById("editDuration").value,
+        price: Number(document.getElementById("editPrice").value),
+        img: document.getElementById("editImg").value,
+        tags: document.getElementById("editTags").value.split(",").map(t=>t.trim()).filter(Boolean)
+      });
+      closeEditModal();
+      loadPlaces();
+    }
+
+    window.removePackage = async (id)=>{
+      if(confirm("Delete this package?")){ await deleteDoc(doc(db,"packages",id)); loadPlaces(); }
+    }
+
+    window.openAdd = ()=>document.getElementById("addModal").classList.add("show");
+    window.closeAddModal = ()=>document.getElementById("addModal").classList.remove("show");
+
+    window.saveAdd = async ()=>{
+      await addDoc(collection(db,"packages"),{
+        name: document.getElementById("addName").value,
+        city: document.getElementById("addCity").value,
+        duration: document.getElementById("addDuration").value,
+        price: Number(document.getElementById("addPrice").value),
+        img: document.getElementById("addImg").value,
+        tags: document.getElementById("addTags").value.split(",").map(t=>t.trim()).filter(Boolean)
+      });
+      closeAddModal();
+      loadPlaces();
+    }
+
+    loadPlaces();
+  </script>
+</body>
+</html>

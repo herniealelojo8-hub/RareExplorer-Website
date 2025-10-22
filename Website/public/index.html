@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Rare Explorer – Travel Packages</title>
+
+  <!-- Google Font (system fallback present) -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    /* -------------------------
+       Reset & Base
+       ------------------------- */
+    :root{
+      --bg:#0f172a;
+      --panel:#0f172a;
+      --card:#111827;
+      --muted:#9ca3af;
+      --accent:#06b6d4;
+      --accent-2:#0891b2;
+      --glass: rgba(255,255,255,0.04);
+      --glass-2: rgba(255,255,255,0.02);
+      --white: #e6eef6;
+      --success: #10b981;
+      --danger: #ef4444;
+      --max-width:1200px;
+      --radius:12px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: "Inter", Arial, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+      background: linear-gradient(180deg, #071026 0%, #081428 55%), var(--bg);
+      color:var(--white);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      line-height:1.45;
+    }
+
+    a{color:inherit}
+    img{display:block;max-width:100%}
+
+    .container{
+      width:100%;
+      max-width:var(--max-width);
+      margin:0 auto;
+      padding:0 20px;
+    }
+
+    /* -------------------------
+       Header (modern glass + shadow on scroll)
+       ------------------------- */
+    header.site-header{
+      position:sticky;
+      top:0;
+      z-index:1200;
+      width:100%;
+      backdrop-filter: blur(8px) saturate(120%);
+      background: linear-gradient(180deg, rgba(7,10,17,0.55), rgba(7,10,17,0.35));
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      transition: box-shadow 220ms ease, background 220ms ease, transform 220ms ease;
+    }
+
+    header.site-header.scrolled{
+      box-shadow: 0 10px 30px rgba(2,6,23,0.6);
+      background: linear-gradient(180deg, rgba(7,10,17,0.75), rgba(7,10,17,0.6));
+      transform: translateY(0);
+    }
+
+    .nav-inner{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:20px;
+      padding:14px 20px;
+      max-width:var(--max-width);
+      margin:0 auto;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+
+    .brand .logo{
+      width:48px;
+      height:48px;
+      border-radius:12px;
+      overflow:hidden;
+      border:2px solid rgba(6,182,212,0.12);
+      background:linear-gradient(135deg, rgba(6,182,212,0.08), rgba(8,145,178,0.03));
+    }
+    .brand .logo img{width:100%;height:100%;object-fit:cover;display:block}
+
+    .brand .title{
+      display:flex;
+      flex-direction:column;
+      line-height:1;
+    }
+    .brand .title .name{
+      font-weight:700;
+      letter-spacing:0.2px;
+      font-size:16px;
+      color:var(--white);
+    }
+    .brand .title .tag{
+      font-size:12px;color:var(--muted);margin-top:2px;
+    }
+
+    /* Primary nav */
+    nav.primary-nav{
+      display:flex;
+      gap:20px;
+      align-items:center;
+    }
+    nav.primary-nav a{
+      text-decoration:none;
+      color:var(--white);
+      font-weight:600;
+      font-size:15px;
+      padding:8px 6px;
+      position:relative;
+      transition:color 180ms ease;
+    }
+    nav.primary-nav a:hover{color:var(--accent)}
+    nav.primary-nav a::after{
+      content:"";
+      position:absolute;
+      left:0;right:0;bottom:-6px;
+      height:2px;background:var(--accent);
+      transform:scaleX(0);
+      transform-origin:center;
+      transition: transform 220ms ease;
+      opacity:0.95;
+    }
+    nav.primary-nav a:hover::after{transform:scaleX(1)}
+
+    .nav-actions{
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:9px 14px;
+      border-radius:10px;
+      font-weight:700;
+      text-decoration:none;
+      cursor:pointer;
+      border:0;
+      transition:transform 140ms ease, box-shadow 140ms ease;
+      user-select:none;
+    }
+
+    .btn-primary{
+      background:linear-gradient(180deg,var(--accent),var(--accent-2));
+      color:#042027;
+      box-shadow: 0 8px 18px rgba(6,182,212,0.12), inset 0 -1px 0 rgba(255,255,255,0.06);
+    }
+    .btn-primary:hover{transform:translateY(-3px); box-shadow:0 16px 28px rgba(6,182,212,0.12);}
+
+    .btn-ghost{
+      background:transparent;
+      color:var(--white);
+      border:1px solid rgba(255,255,255,0.04);
+      padding:8px 12px;
+      font-weight:600;
+    }
+
+    /* Mobile hamburger */
+    .hamburger{
+      display:none;
+      width:44px;height:44px;border-radius:10px;
+      align-items:center;justify-content:center;
+      cursor:pointer;
+      background:transparent;border:0;
+    }
+    .hamburger .lines{
+      width:22px;height:2px;background:var(--white);position:relative;transition:all 220ms ease;
+    }
+    .hamburger .lines::before, .hamburger .lines::after{
+      content:"";position:absolute;left:0;width:22px;height:2px;background:var(--white);transition:all 220ms ease;
+    }
+    .hamburger .lines::before{top:-7px}
+    .hamburger .lines::after{top:7px}
+
+    .hamburger.open .lines{background:transparent}
+    .hamburger.open .lines::before{transform:translateY(7px) rotate(45deg)}
+    .hamburger.open .lines::after{transform:translateY(-7px) rotate(-45deg)}
+
+    /* -------------------------
+       Hero
+       ------------------------- */
+    .hero{
+      min-height:68vh;
+      display:grid;
+      place-items:center;
+      text-align:left;
+      padding:80px 20px;
+      background-image: linear-gradient(180deg, rgba(2,6,23,0.2), rgba(2,6,23,0.35)), url('Images/Boracay 1.jpg');
+      background-size:cover;
+      background-position:center;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .hero .hero-inner{
+      width:100%;
+      max-width:var(--max-width);
+      margin:0 auto;
+      display:flex;
+      align-items:center;
+      gap:40px;
+      padding:40px 20px;
+    }
+
+    .hero .left{
+      flex:1 1 520px;
+      color:var(--white);
+    }
+    .hero .eyebrow{
+      display:inline-block;
+      background:linear-gradient(90deg, rgba(6,182,212,0.12), rgba(8,145,178,0.08));
+      color:var(--accent);
+      padding:6px 10px;
+      border-radius:999px;
+      font-weight:700;
+      font-size:13px;
+      margin-bottom:18px;
+      border:1px solid rgba(6,182,212,0.06);
+    }
+    .hero h1{
+      font-size:44px;
+      line-height:1.02;
+      margin:6px 0 12px;
+      text-shadow: 0 6px 28px rgba(2,6,23,0.6);
+    }
+    .hero p.lead{
+      color:var(--muted);
+      font-size:17px;
+      margin-bottom:20px;
+      max-width:55ch;
+    }
+
+    .hero .hero-cta{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      margin-top:8px;
+      flex-wrap:wrap;
+    }
+
+    .hero .stat-cards{
+      display:flex;
+      gap:12px;
+      margin-top:28px;
+      align-items:center;
+    }
+    .stat{
+      background:var(--glass);
+      padding:10px 14px;
+      border-radius:10px;
+      border:1px solid rgba(255,255,255,0.03);
+      color:var(--white);
+      font-weight:700;
+      font-size:14px;
+    }
+
+    /* right visual card */
+    .hero .right{
+      width:420px;
+      min-width:260px;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+    }
+    .card-visual{
+      width:100%;
+      border-radius:18px;
+      overflow:hidden;
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      box-shadow: 0 14px 40px rgba(2,6,23,0.6);
+      border:1px solid rgba(255,255,255,0.04);
+    }
+    .card-visual img{width:100%;height:320px;object-fit:cover;display:block}
+    .card-visual .meta{
+      padding:14px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+    .meta .meta-left h4{margin:0;font-size:16px;color:var(--white)}
+    .meta .meta-left p{margin:0;color:var(--muted);font-size:13px}
+    .price-badge{
+      background:linear-gradient(180deg,var(--accent),var(--accent-2));
+      color:#042027;
+      padding:8px 12px;border-radius:10px;font-weight:800;
+      box-shadow:0 8px 22px rgba(6,182,212,0.12);
+    }
+
+    /* -------------------------
+       Locations / Cards grid
+       ------------------------- */
+    section.locations{
+      padding:64px 20px;
+      max-width:var(--max-width);
+      margin:0 auto;
+    }
+    section.locations h2{
+      font-size:28px;margin-bottom:12px;color:var(--white);
+    }
+    section.locations p.subtitle{color:var(--muted);margin-bottom:28px}
+
+    .location-cards{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:18px;
+    }
+
+    .pkg-card{
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:14px;
+      overflow:hidden;
+      box-shadow: 0 10px 30px rgba(2,6,23,0.55);
+      transition: transform 220ms ease, box-shadow 220ms ease;
+      border:1px solid rgba(255,255,255,0.03);
+      cursor:pointer;
+      display:flex;
+      flex-direction:column;
+    }
+    .pkg-card:hover{transform:translateY(-10px);box-shadow:0 22px 48px rgba(2,6,23,0.6);}
+
+    .pkg-card .imgwrap{height:170px;overflow:hidden;}
+    .pkg-card img{width:100%;height:100%;object-fit:cover;display:block;transition:transform 400ms ease}
+    .pkg-card:hover img{transform:scale(1.05)}
+
+    .pkg-body{padding:14px;display:flex;flex-direction:column;gap:8px}
+    .pkg-title{
+      display:flex;justify-content:space-between;align-items:start;gap:8px;
+    }
+    .pkg-title h3{margin:0;font-size:16px;color:var(--accent);font-weight:800}
+    .pkg-title p.sub{margin:0;color:var(--muted);font-size:13px}
+
+    .pkg-meta{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
+    .pkg-meta .duration{font-size:13px;color:var(--muted)}
+    .pkg-meta .price{font-weight:800;color:var(--white)}
+
+    /* -------------------------
+       Modal (package details)
+       ------------------------- */
+    .modal{
+      position:fixed;inset:0;display:none;place-items:center;
+      background:rgba(2,6,23,0.6);z-index:1400;padding:28px;
+    }
+    .modal.open{display:grid}
+    .modal-card{
+      width:100%;max-width:980px;border-radius:14px;overflow:hidden;background:linear-gradient(180deg,#0b1220,#071126);
+      box-shadow:0 30px 80px rgba(2,6,23,0.8);border:1px solid rgba(255,255,255,0.04);
+      display:grid;grid-template-columns: 1fr 1fr;gap:0;
+    }
+    .modal-left img{width:100%;height:100%;object-fit:cover;display:block}
+    .modal-body{padding:20px;color:var(--white)}
+    .modal-body h2{margin:0 0 8px;font-size:20px;color:var(--accent)}
+    .tags{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 12px}
+    .tag{background:rgba(255,255,255,0.02);padding:8px 10px;border-radius:999px;border:1px solid rgba(255,255,255,0.02);font-size:13px;color:var(--white)}
+    .modal-body p{color:var(--muted)}
+    .modal-actions{display:flex;gap:10px;margin-top:18px;align-items:center}
+    .close-modal{margin-left:auto;background:transparent;border:0;color:var(--muted);font-weight:700;cursor:pointer}
+
+    /* -------------------------
+       Footer
+       ------------------------- */
+    footer.site-footer{
+      margin-top:48px;padding:48px 20px;background:linear-gradient(180deg,#071026,#061122);border-top:1px solid rgba(255,255,255,0.03)
+    }
+    .footer-grid{display:flex;gap:40px;max-width:var(--max-width);margin:0 auto;padding:0 20px;align-items:flex-start;flex-wrap:wrap}
+    .footer-col{min-width:220px;flex:1}
+    .footer-col h4{color:var(--accent);margin-bottom:12px}
+    .footer-col p{color:var(--muted);line-height:1.5 font-size14px}
+    .socials{display:flex;gap:10px;margin-top:8px}
+    .socials a{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.02)}
+
+    /* -------------------------
+       Responsive
+       ------------------------- */
+    @media (max-width:1100px){
+      .location-cards{grid-template-columns:repeat(3,1fr)}
+      .hero .hero-inner{gap:24px}
+    }
+    @media (max-width:900px){
+      .nav-inner{padding:10px 16px}
+      nav.primary-nav{display:none}
+      .nav-actions{display:none}
+      .hamburger{display:flex}
+      .hero{padding:40px 12px}
+      .hero h1{font-size:32px}
+      .hero .hero-inner{flex-direction:column;align-items:flex-start;padding:24px}
+      .hero .right{width:100%}
+      .hero .card-visual img{height:220px}
+      .location-cards{grid-template-columns:repeat(2,1fr)}
+      .modal-card{grid-template-columns:1fr;max-width:720px}
+      .modal-left{height:260px;overflow:hidden}
+    }
+    @media (max-width:520px){
+      .location-cards{grid-template-columns:1fr}
+      .brand .title .name{font-size:15px}
+      .hero h1{font-size:24px}
+      .hero p.lead{font-size:15px}
+    }
+
+    /* small helpers */
+    .muted{color:var(--muted)}
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="site-header" id="siteHeader" role="banner">
+    <div class="nav-inner">
+      <div class="brand" aria-label="RareExplorer">
+        <div class="logo" aria-hidden="true">
+          <img src="Images/logo.jpg" alt="Rare Explorer logo">
+        </div>
+        <div class="title">
+          <div class="name">RareExplorer</div>
+          <div class="tag">Travel & Tours</div>
+        </div>
+      </div>
+
+      <nav class="primary-nav" aria-label="Main navigation" id="primaryNav">
+        <a href="Index.html">Home</a>
+        <a href="About.html">About</a>
+        <a href="#footer">Contact</a>
+        <a href="UserSignup.html">Sign Up</a>
+      </nav>
+
+      <div class="nav-actions" aria-hidden="false">
+        <button class="btn btn-ghost" onclick="location.href='tel:09150091980'">Call: 0915-009-1980</button>
+        <a class="btn btn-primary" href="UserSignup.html">Book Now</a>
+      </div>
+
+      <button class="hamburger" aria-label="Toggle menu" id="hamburgerBtn" aria-expanded="false">
+        <span class="lines"></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero" role="region" aria-label="Featured destination">
+    <div class="hero-inner container">
+      <div class="left">
+        <div class="eyebrow">Discover | Explore | Relax</div>
+        <h1>Explore the world with RareExplorer — curated trips & unforgettable memories</h1>
+        <p class="lead">Hand-picked travel packages across the Philippines and Asia. Small groups, local guides, flexible dates, and great value — we handle the details so you can enjoy the trip.</p>
+
+        <div class="hero-cta">
+          <a class="btn btn-primary" onclick="openModal('boracay')">View Boracay Package</a>
+          <a class="btn btn-ghost" href="UserSignup.html">Sign Up</a>
+        </div>
+
+        <div class="stat-cards" aria-hidden="true">
+          <div class="stat">Beautiful Views</div>
+          <div class="stat">Trusted Local Guides</div>
+        </div>
+      </div>
+
+      <div class="right">
+        <div class="card-visual" role="img" aria-label="Boracay preview">
+          <img src="Images/Boracay_.jpg" alt="Boracay white beach">
+          <div class="meta">
+            <div class="meta-left">
+              <h4>Boracay — White Beach</h4>
+              <p class="muted">3 Days • Beach Activities • Island Hopping</p>
+            </div>
+            <div class="price-badge">₱12,500</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LOCATIONS -->
+  <section class="locations" aria-labelledby="topdest">
+    <div class="container">
+      <h2 id="topdest">Top Destinations</h2>
+      <p class="subtitle muted">Popular and recommended packages curated by our travel experts.</p>
+
+      <div class="location-cards" id="locationCards">
+        <!-- Card 1 -->
+        <article class="pkg-card" data-target="boracay" tabindex="0" aria-label="Boracay package — click for details" role="button" onclick="openModal('boracay')">
+          <div class="imgwrap"><img src="Images/Boracay_.jpg" alt="Boracay"></div>
+          <div class="pkg-body">
+            <div class="pkg-title">
+              <h3>Boracay</h3>
+              <p class="sub">White Beach Paradise</p>
+            </div>
+            <div class="pkg-meta">
+              <div class="duration muted">3 Days • 2 Nights</div>
+              <div class="price">₱12,500</div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Card 2 -->
+        <article class="pkg-card" data-target="elnido" tabindex="0" aria-label="El Nido package" role="button" onclick="openModal('elnido')">
+          <div class="imgwrap"><img src="Images/Elnido.jpg" alt="El Nido"></div>
+          <div class="pkg-body">
+            <div class="pkg-title">
+              <h3>El Nido</h3>
+              <p class="sub">Island Hopping Adventure</p>
+            </div>
+            <div class="pkg-meta">
+              <div class="duration muted">4 Days • 3 Nights</div>
+              <div class="price">₱15,000</div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Card 3 -->
+        <article class="pkg-card" data-target="hongkong" tabindex="0" role="button" onclick="openModal('hongkong')" aria-label="Hong Kong package">
+          <div class="imgwrap"><img src="Images/Hongkong_.jpg" alt="Hong Kong"></div>
+          <div class="pkg-body">
+            <div class="pkg-title">
+              <h3>Hong Kong</h3>
+              <p class="sub">City Lights & Disneyland</p>
+            </div>
+            <div class="pkg-meta">
+              <div class="duration muted">5 Days • 4 Nights</div>
+              <div class="price">₱20,000</div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Card 4 -->
+        <article class="pkg-card" data-target="japan" tabindex="0" role="button" onclick="openModal('japan')" aria-label="Japan package">
+          <div class="imgwrap"><img src="Images/Japan.jpg" alt="Japan"></div>
+          <div class="pkg-body">
+            <div class="pkg-title">
+              <h3>Japan</h3>
+              <p class="sub">Tradition Meets Technology</p>
+            </div>
+            <div class="pkg-meta">
+              <div class="duration muted">7 Days • 6 Nights</div>
+              <div class="price">₱45,000</div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Card 5 -->
+        <article class="pkg-card" data-target="korea" tabindex="0" role="button" onclick="openModal('korea')" aria-label="South Korea package">
+          <div class="imgwrap"><img src="Images/South Korea.jpg" alt="South Korea"></div>
+          <div class="pkg-body">
+            <div class="pkg-title">
+              <h3>South Korea</h3>
+              <p class="sub">Palaces & K-Pop</p>
+            </div>
+            <div class="pkg-meta">
+              <div class="duration muted">6 Days • 5 Nights</div>
+              <div class="price">₱35,000</div>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- MODALS -->
+  <!-- Generic modal structure reused for each package -->
+  <div id="boracay" class="modal" role="dialog" aria-hidden="true" aria-labelledby="boracayTitle">
+    <div class="modal-card" role="document">
+      <div class="modal-left"><img src="Images/Boracay_.jpg" alt="Boracay image"></div>
+      <div class="modal-body">
+        <h2 id="boracayTitle">Boracay Travel Package</h2>
+        <p class="muted">Price: <strong>₱12,500</strong> • Duration: <strong>3 Days 2 Nights</strong></p>
+        <div class="tags" aria-hidden="true">
+          <span class="tag">Accommodation</span>
+          <span class="tag">Breakfast</span>
+          <span class="tag">Island Hopping</span>
+          <span class="tag">Airport Transfer</span>
+          <span class="tag">Tour Guide</span>
+        </div>
+        <h3 style="color:var(--white);margin-top:12px">Activities</h3>
+        <p class="muted">Parasailing, kite surfing, paddle boarding, cliff diving, scuba diving, snorkeling.</p>
+        <div class="modal-actions">
+          <a class="btn btn-primary" href="UserSignup.html">Book This Trip</a>
+          <a class="btn btn-ghost" href="mailto:rareexplorer14@gmail.com">Email Inquiry</a>
+          <button class="close-modal" onclick="closeModal('boracay')" aria-label="Close details">Close ✕</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="elnido" class="modal" role="dialog" aria-hidden="true" aria-labelledby="elnidoTitle">
+    <div class="modal-card">
+      <div class="modal-left"><img src="Images/Elnido.jpg" alt="El Nido image"></div>
+      <div class="modal-body">
+        <h2 id="elnidoTitle">El Nido Travel Package</h2>
+        <p class="muted">Price: <strong>₱15,000</strong> • Duration: <strong>4 Days 3 Nights</strong></p>
+        <div class="tags">
+          <span class="tag">Accommodation</span>
+          <span class="tag">Breakfast</span>
+          <span class="tag">Island Hopping</span>
+          <span class="tag">Snorkeling</span>
+          <span class="tag">Kayaking</span>
+        </div>
+        <h3 style="color:var(--white);margin-top:12px">Activities</h3>
+        <p class="muted">Snorkeling, kayaking, beach hopping, sunset viewing, local dining experience.</p>
+        <div class="modal-actions">
+          <a class="btn btn-primary" href="UserSignup.html">Book This Trip</a>
+          <button class="close-modal" onclick="closeModal('elnido')" aria-label="Close details">Close ✕</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="hongkong" class="modal" role="dialog" aria-hidden="true" aria-labelledby="hkTitle">
+    <div class="modal-card">
+      <div class="modal-left"><img src="Images/Hongkong_.jpg" alt="Hong Kong image"></div>
+      <div class="modal-body">
+        <h2 id="hkTitle">Hong Kong Travel Package</h2>
+        <p class="muted">Price: <strong>₱20,000</strong> • Duration: <strong>5 Days 4 Nights</strong></p>
+        <div class="tags">
+          <span class="tag">Accommodation</span>
+          <span class="tag">Breakfast</span>
+          <span class="tag">City Tour</span>
+          <span class="tag">Disneyland Ticket</span>
+          <span class="tag">Airport Transfer</span>
+        </div>
+        <h3 style="color:var(--white);margin-top:12px">Activities</h3>
+        <p class="muted">City tour, Disneyland visit, Victoria Peak, shopping, night markets, local cuisine tasting.</p>
+        <div class="modal-actions">
+          <a class="btn btn-primary" href="UserSignup.html">Book This Trip</a>
+          <button class="close-modal" onclick="closeModal('hongkong')" aria-label="Close details">Close ✕</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="japan" class="modal" role="dialog" aria-hidden="true" aria-labelledby="japanTitle">
+    <div class="modal-card">
+      <div class="modal-left"><img src="Images/Japan.jpg" alt="Japan image"></div>
+      <div class="modal-body">
+        <h2 id="japanTitle">Japan Travel Package</h2>
+        <p class="muted">Price: <strong>₱45,000</strong> • Duration: <strong>7 Days 6 Nights</strong></p>
+        <div class="tags">
+          <span class="tag">Accommodation</span>
+          <span class="tag">Breakfast</span>
+          <span class="tag">Shinkansen Pass</span>
+          <span class="tag">City Tours</span>
+          <span class="tag">Cultural Experience</span>
+        </div>
+        <h3 style="color:var(--white);margin-top:12px">Activities</h3>
+        <p class="muted">City sightseeing, temple visits, sushi making class, cherry blossom tour, shopping, theme parks.</p>
+        <div class="modal-actions">
+          <a class="btn btn-primary" href="UserSignup.html">Book This Trip</a>
+          <button class="close-modal" onclick="closeModal('japan')" aria-label="Close details">Close ✕</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="korea" class="modal" role="dialog" aria-hidden="true" aria-labelledby="koreaTitle">
+    <div class="modal-card">
+      <div class="modal-left"><img src="Images/South Korea.jpg" alt="South Korea image"></div>
+      <div class="modal-body">
+        <h2 id="koreaTitle">South Korea Travel Package</h2>
+        <p class="muted">Price: <strong>₱35,000</strong> • Duration: <strong>6 Days 5 Nights</strong></p>
+        <div class="tags">
+          <span class="tag">Accommodation</span>
+          <span class="tag">Breakfast</span>
+          <span class="tag">City Tour</span>
+          <span class="tag">Palace Visits</span>
+          <span class="tag">K-Pop Experience</span>
+        </div>
+        <h3 style="color:var(--white);margin-top:12px">Activities</h3>
+        <p class="muted">Palace and cultural tours, K-pop dance experience, shopping in Myeongdong, Korean BBQ tasting, N Seoul Tower visit.</p>
+        <div class="modal-actions">
+          <a class="btn btn-primary" href="UserSignup.html">Book This Trip</a>
+          <button class="close-modal" onclick="closeModal('korea')" aria-label="Close details">Close ✕</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="footer-grid">
+      <div class="footer-col">
+        <h4>Rare Explorer</h4>
+        <p class="muted">We help you explore the Philippines’ hidden gems and memorable travel experiences — thoughtfully curated trips with reliable local partners.</p>
+        <div class="socials" aria-hidden="true" style="margin-top:12px">
+          <a href="https://www.facebook.com/RaRe.explorer14/" target="_blank" rel="noopener"><img src="Images/facebook.jfif" alt="facebook" style="width:20px"></a>
+          <a href="https://tiktok.com/@raeexplor.trav" target="_blank" rel="noopener"><img src="Images/tiktok.png" alt="tiktok" style="width:20px"></a>
+          <a href="https://instagram.com/rareexplorer.traveltours" target="_blank" rel="noopener"><img src="Images/download.jfif" alt="instagram" style="width:20px"></a>
+        </div>
+      </div>
+    <footer class="site-footer" id="footer" role="contentinfo"></footer>
+      <div class="footer-col">
+        <h4>Contact</h4>
+        <p class="muted"><strong>Address:</strong> Quezon City, Philippines</p>
+        <p class="muted"><strong>Mobile:</strong> <a href="tel:09150091980" style="color:var(--accent)">0915-009-1980</a></p>
+        <p class="muted"><strong>Email:</strong> <a href="mailto:rareexplorer14@gmail.com" style="color:var(--accent)">rareexplorer14@gmail.com</a></p>
+      </div>
+    </div>
+
+    <div style="max-width:var(--max-width);margin:20px auto 0;padding:0 20px;color:var(--muted);text-align:center;font-size:14px">
+      &copy; <span id="yearLabel"></span> Rare Explorer Travel & Tours. All rights reserved.
+    </div>
+  </footer>
+
+  <!-- SCRIPTS -->
+  <script>
+    // Header shadow on scroll
+    (function(){
+      const header = document.getElementById('siteHeader');
+      const threshold = 20;
+      const onScroll = () => {
+        if(window.scrollY > threshold) header.classList.add('scrolled');
+        else header.classList.remove('scrolled');
+      };
+      window.addEventListener('scroll', onScroll);
+      onScroll();
+    })();
+
+    // Mobile menu toggle (simple accessible open/close for primary nav)
+    (function(){
+      const btn = document.getElementById('hamburgerBtn');
+      const nav = document.getElementById('primaryNav');
+      let open = false;
+      btn.addEventListener('click', () => {
+        open = !open;
+        btn.classList.toggle('open', open);
+        btn.setAttribute('aria-expanded', String(open));
+        
+        if(open){
+          nav.style.display = 'flex';
+          nav.style.position = 'fixed';
+          nav.style.top = '72px';
+          nav.style.right = '16px';
+          nav.style.flexDirection = 'column';
+          nav.style.background = 'linear-gradient(180deg, rgba(7,10,17,0.95), rgba(7,10,17,0.98))';
+          nav.style.padding = '16px';
+          nav.style.borderRadius = '12px';
+          nav.style.zIndex = 1600;
+          nav.style.boxShadow = '0 20px 50px rgba(2,6,23,0.6)';
+        } else {
+          nav.removeAttribute('style');
+        }
+      });
+
+      // Close mobile nav if clicking outside
+      document.addEventListener('click', (e) => {
+        if(open && !btn.contains(e.target) && !nav.contains(e.target)){
+          btn.click();
+        }
+      });
+    })();
+
+    // Modal handling (open by id, close by id)
+    (function(){
+      const openModal = (id) => {
+        const el = document.getElementById(id);
+        if(!el) return;
+        el.classList.add('open');
+        el.setAttribute('aria-hidden','false');
+        document.body.style.overflow = 'hidden';
+       
+        const focusable = el.querySelector('a,button,[tabindex]:not([tabindex="-1"])');
+        if(focusable) focusable.focus();
+      };
+      const closeModal = (id) => {
+        const el = document.getElementById(id);
+        if(!el) return;
+        el.classList.remove('open');
+        el.setAttribute('aria-hidden','true');
+        document.body.style.overflow = '';
+      };
+
+   
+      window.openModal = openModal;
+      window.closeModal = closeModal;
+
+      // close modal on Esc or click outside modal-card
+      document.addEventListener('keydown', (e) => {
+        if(e.key === 'Escape'){
+          document.querySelectorAll('.modal.open').forEach(m => {
+            m.classList.remove('open');
+            m.setAttribute('aria-hidden','true');
+          });
+          document.body.style.overflow = '';
+        }
+      });
+
+      document.addEventListener('click', (e) => {
+        if(e.target.classList.contains('modal')){
+          e.target.classList.remove('open');
+          e.target.setAttribute('aria-hidden','true');
+          document.body.style.overflow = '';
+        }
+      });
+
+      // allow Enter/Space on pkg-card to open modal (keyboard accessible)
+      document.querySelectorAll('.pkg-card').forEach(card => {
+        card.addEventListener('keydown', (ev) => {
+          if(ev.key === 'Enter' || ev.key === ' '){
+            ev.preventDefault();
+            const id = card.getAttribute('data-target');
+            if(id) openModal(id);
+          }
+        });
+      });
+
+    })();
+  
+    //Footer
+    
+    document.getElementById('yearLabel').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
