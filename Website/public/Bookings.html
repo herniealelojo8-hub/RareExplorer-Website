@@ -132,7 +132,7 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    onAuthStateChanged(auth, (user) => { if(!user) window.location.href = "UserSignup.html"; });
+    onAuthStateChanged(auth, (user) => { if(!user) window.location.href = "Adminsignup.html"; });
 
     let bookings = [];
     const tbody = document.getElementById('tbody');
